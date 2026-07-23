@@ -34,6 +34,13 @@ export default function App() {
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [history, setHistory] = useState<CellValue[][][]>([]);
   
+  // User Profile
+  const [username, setUsername] = useState('Mew Master');
+  const [avatar, setAvatar] = useState('🐱');
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editAvatar, setEditAvatar] = useState('');
+  
   // Modals
   const [isPaused, setIsPaused] = useState(false);
   const [isVictory, setIsVictory] = useState(false);
@@ -72,6 +79,16 @@ export default function App() {
     if (savedMuted === 'true') {
       setIsMuted(true);
       audio.setMuted(true);
+    }
+
+    const savedUsername = localStorage.getItem('mewdoku_profile_username');
+    if (savedUsername) {
+      setUsername(savedUsername);
+    }
+
+    const savedAvatar = localStorage.getItem('mewdoku_profile_avatar');
+    if (savedAvatar) {
+      setAvatar(savedAvatar);
     }
 
     // Try locking screen orientation to portrait using Capacitor
@@ -389,6 +406,27 @@ export default function App() {
     }
   };
 
+  // Save profile helper
+  const saveProfile = (newUsername: string, newAvatar: string) => {
+    setUsername(newUsername);
+    setAvatar(newAvatar);
+    localStorage.setItem('mewdoku_profile_username', newUsername);
+    localStorage.setItem('mewdoku_profile_avatar', newAvatar);
+  };
+
+  const handleOpenEditProfile = () => {
+    setEditName(username);
+    setEditAvatar(avatar);
+    setIsEditingProfile(true);
+  };
+
+  const handleSaveProfile = () => {
+    const trimmed = editName.trim();
+    const finalName = trimmed ? trimmed : 'Mew Master';
+    saveProfile(finalName, editAvatar);
+    setIsEditingProfile(false);
+  };
+
   const toggleMute = () => {
     const nextMuted = !isMuted;
     setIsMuted(nextMuted);
@@ -463,6 +501,16 @@ export default function App() {
       {/* 1. HOME SCREEN */}
       {screen === 'home' && (
         <div className="screen">
+          {/* User Profile Widget */}
+          <div className="home-profile-widget" onClick={handleOpenEditProfile} title="Edit Profile">
+            <span className="profile-widget-avatar">{avatar}</span>
+            <div className="profile-widget-details">
+              <span className="profile-widget-name">{username}</span>
+              <span className="profile-widget-rank">🐾 Cat Scout ({stats.gamesWon} Wins)</span>
+            </div>
+            <span className="profile-widget-edit">✏️</span>
+          </div>
+
           <div className="title-container">
             <div className="logo-cat">🐱</div>
             <h1 className="app-title">
@@ -553,9 +601,16 @@ export default function App() {
       {screen === 'game' && puzzle && (
         <div className="screen">
           <div className="game-header">
-            <button className="header-btn" onClick={() => { audio.playClick(); setScreen('home'); }}>
-              🏠 Menu
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button className="header-btn" onClick={() => { audio.playClick(); setScreen('home'); }}>
+                🏠 Menu
+              </button>
+              
+              <div className="game-profile-badge" onClick={handleOpenEditProfile} title="Edit Profile">
+                <span className="game-profile-avatar">{avatar}</span>
+                <span className="game-profile-name">{username}</span>
+              </div>
+            </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
               <div className="timer-badge" style={{ padding: '4px 8px', fontSize: '13px' }}>
@@ -789,6 +844,67 @@ export default function App() {
       {/* 5. INTERACTIVE TUTORIAL SCREEN */}
       {screen === 'tutorial' && (
         <Tutorial onClose={() => setScreen('home')} />
+      )}
+
+      {/* Edit Profile Modal */}
+      {isEditingProfile && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '300px' }}>
+            <h3 className="modal-title">Edit Profile 👤</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', margin: '15px 0' }}>
+              {/* Name Input */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left' }}>
+                <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-main)' }}>Name:</label>
+                <input 
+                  type="text" 
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  maxLength={15}
+                  className="profile-input"
+                  placeholder="Enter name..."
+                />
+              </div>
+
+              {/* Avatar Picker */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
+                <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-main)' }}>Select Avatar:</label>
+                <div className="avatar-picker-grid">
+                  {['🐱', '🦁', '🐯', '🐈', '🦊', '🐨', '🐼', '🐾', '👑'].map(emoji => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      className={`avatar-picker-btn ${editAvatar === emoji ? 'selected' : ''}`}
+                      onClick={() => {
+                        audio.playClick();
+                        setEditAvatar(emoji);
+                      }}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-buttons" style={{ display: 'flex', gap: '10px', width: '100%' }}>
+              <button 
+                className="btn-primary" 
+                style={{ flex: 1, padding: '8px' }}
+                onClick={handleSaveProfile}
+              >
+                Save
+              </button>
+              <button 
+                className="btn-secondary" 
+                style={{ flex: 1, padding: '8px' }}
+                onClick={() => { audio.playClick(); setIsEditingProfile(false); }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

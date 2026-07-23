@@ -721,3 +721,142 @@ body {
   color: #388e3c;
   opacity: 0.8;
 }
+
+/* User Profile Widget on Home Screen */
+.home-profile-widget {
+  background: var(--panel-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 24px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 0 var(--border-color);
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  max-width: 280px;
+  width: 90%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-profile-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--border-color);
+}
+
+.profile-widget-avatar {
+  font-size: 28px;
+  background: #fff9e6;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-widget-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.profile-widget-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.profile-widget-rank {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.profile-widget-edit {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+/* User Profile Badge in Game Header */
+.game-profile-badge {
+  background: var(--panel-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 0 var(--border-color);
+  cursor: pointer;
+  max-height: 32px;
+}
+
+.game-profile-avatar {
+  font-size: 16px;
+}
+
+.game-profile-name {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-main);
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Profile Input Field */
+.profile-input {
+  background: #fffdf5;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-main);
+  outline: none;
+  width: 100%;
+}
+
+.profile-input:focus {
+  border-color: var(--primary);
+}
+
+/* Avatar Selection Grid */
+.avatar-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.avatar-picker-btn {
+  background: #fffdf5;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  padding: 0;
+}
+
+.avatar-picker-btn:active {
+  transform: scale(0.95);
+}
+
+.avatar-picker-btn.selected {
+  background: #fff176 !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px var(--primary);
+}
