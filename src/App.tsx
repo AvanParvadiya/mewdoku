@@ -1,13 +1,12 @@
-import React from 'react';
-import { useGamePlay } from './hooks/useGamePlay';
-import { useUserProfile } from './hooks/useUserProfile';
+import { GameBoard } from './components/GameBoard';
 import { MainDashboard } from './components/Dashboard';
+import { Decorations } from './components/Decorations';
+import { EditProfileModal } from './components/EditProfileModal';
 import { GameHeader } from './components/GameHeader';
 import { GoalsHUD } from './components/GoalsHUD';
-import { GameBoard } from './components/GameBoard';
-import { EditProfileModal } from './components/EditProfileModal';
-import { PauseModal, VictoryModal, GameOverModal } from './components/Modals';
-import { Decorations } from './components/Decorations';
+import { GameOverModal, PauseModal, VictoryModal } from './components/Modals';
+import { useGamePlay } from './hooks/useGamePlay';
+import { useUserProfile } from './hooks/useUserProfile';
 import { audio } from './utils/AudioEngine';
 
 export default function App() {
@@ -62,7 +61,7 @@ export default function App() {
 
       {/* 1. HOME / DASHBOARD SCREEN */}
       {screen === 'home' && (
-        <MainDashboard 
+        <MainDashboard
           username={username}
           avatar={avatar}
           gamesWon={stats.gamesWon}

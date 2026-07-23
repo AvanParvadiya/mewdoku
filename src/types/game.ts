@@ -12,3 +12,8 @@ export interface GameStats {
     master: number | null;
   };
 }
+
+export interface Position {
+  row: number;
+  col: number;
+}

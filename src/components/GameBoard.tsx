@@ -67,8 +67,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                 className={`cell cell-region-${regionId} ${borderClass} ${isError ? 'cell-error' : ''}`}
                 onClick={() => onCellClick(r, c)}
               >
-                {value === 'CAT' && <span className="cell-content cell-cat">🐱</span>}
-                {value === 'X' && <span className="cell-content cell-x">❌</span>}
+                {isError && <span className="cell-content cell-crying">😭</span>}
+                {!isError && value === 'CAT' && <span className="cell-content cell-cat">🐱</span>}
+                {!isError && value === 'X' && <span className="cell-content cell-x">❌</span>}
               </div>
             );
           })

@@ -12,13 +12,13 @@ export const Decorations: React.FC = () => {
   return (
     <div className="decorations">
       {petalConfigs.map((cfg, idx) => (
-        <div 
+        <div
           key={idx}
-          className="petal" 
-          style={{ 
-            left: cfg.left, 
-            animationDelay: cfg.delay, 
-            animationDuration: cfg.duration 
+          className="petal"
+          style={{
+            left: cfg.left,
+            animationDelay: cfg.delay,
+            animationDuration: cfg.duration
           }}
         ></div>
       ))}
