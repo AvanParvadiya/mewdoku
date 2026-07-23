@@ -87,6 +87,28 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
         { r: 2, c: 0 }, { r: 2, c: 2 }, { r: 2, c: 3 },
         { r: 3, c: 2 }
       ]
+    },
+    {
+      title: "🎯 5. The Goal HUD Checklist",
+      text: "Look at the header icons to track your level completion progress:\n• 🐱 Cats: Shows placed cats vs the target size.\n• ↔️ Rows: Tracks how many rows & columns have cats.\n• 🎨 Colors: Tracks how many colored areas contain a cat.\n\nThese icons and counts turn green once the logic condition is fulfilled!",
+      grid: [
+        [0, 0, 1, 1],
+        [0, 2, 2, 1],
+        [3, 2, 2, 4],
+        [3, 3, 4, 4]
+      ],
+      cats: [
+        { r: 0, c: 1, label: "🐱" },
+        { r: 1, c: 3, label: "🐱" },
+        { r: 2, c: 0, label: "🐱" },
+        { r: 3, c: 2, label: "🐱" }
+      ],
+      xMarks: [
+        { r: 0, c: 0 }, { r: 0, c: 2 }, { r: 0, c: 3 },
+        { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: 2 },
+        { r: 2, c: 1 }, { r: 2, c: 2 }, { r: 2, c: 3 },
+        { r: 3, c: 0 }, { r: 3, c: 1 }, { r: 3, c: 3 }
+      ]
     }
   ];
 

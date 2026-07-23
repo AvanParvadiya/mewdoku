@@ -308,6 +308,48 @@ export default function App() {
     }
   };
 
+  // Helper to count placed cats
+  const getPlacedCatsCount = () => {
+    let count = 0;
+    for (let r = 0; r < boardSize; r++) {
+      for (let c = 0; c < boardSize; c++) {
+        if (grid[r] && grid[r][c] === 'CAT') count++;
+      }
+    }
+    return count;
+  };
+
+  // Helper to check completed rows/columns/regions count
+  const getGameProgress = () => {
+    const catsCount = getPlacedCatsCount();
+    
+    // Rows completed
+    let rowsDone = 0;
+    for (let r = 0; r < boardSize; r++) {
+      if (grid[r] && grid[r].includes('CAT')) rowsDone++;
+    }
+
+    // Columns completed
+    let colsDone = 0;
+    for (let c = 0; c < boardSize; c++) {
+      let hasCat = false;
+      for (let r = 0; r < boardSize; r++) {
+        if (grid[r] && grid[r][c] === 'CAT') {
+          hasCat = true;
+          break;
+        }
+      }
+      if (hasCat) colsDone++;
+    }
+
+    return {
+      catsCount,
+      rowsDone,
+      colsDone,
+      regionsDone: catsCount,
+    };
+  };
+
   // Check if grid matches victory state
   const checkWinCondition = (currentGrid: CellValue[][]) => {
     if (!puzzle) return;
@@ -515,21 +557,49 @@ export default function App() {
               🏠 Menu
             </button>
             
-            <div className="timer-badge">
-              ⏱️ {formatTime(timer)}
-            </div>
-
-            <div className="hearts-container">
-              {Array.from({ length: 3 }).map((_, idx) => (
-                <span 
-                  key={idx} 
-                  className={`heart-icon ${idx < mistakes ? 'heart-lost' : ''}`}
-                >
-                  ❤️
-                </span>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+              <div className="timer-badge" style={{ padding: '4px 8px', fontSize: '13px' }}>
+                ⏱️ {formatTime(timer)}
+              </div>
+              <div className="hearts-container" style={{ fontSize: '16px' }}>
+                {Array.from({ length: 3 }).map((_, idx) => (
+                  <span 
+                    key={idx} 
+                    className={`heart-icon ${idx < mistakes ? 'heart-lost' : ''}`}
+                  >
+                    ❤️
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
+
+          {/* 3-Column Goal HUD Bar (Full Gameplay Width) */}
+          {(() => {
+            const progress = getGameProgress();
+            return (
+              <div className="goals-hud-bar">
+                <div className={`goal-hud-card ${progress.catsCount === boardSize ? 'done' : ''}`}>
+                  <span className="goal-card-icon">🐱</span>
+                  <span className="goal-card-title">Cats</span>
+                  <span className="goal-card-value">{progress.catsCount} / {boardSize}</span>
+                  <span className="goal-card-desc">Place all cats</span>
+                </div>
+                <div className={`goal-hud-card ${progress.rowsDone === boardSize && progress.colsDone === boardSize ? 'done' : ''}`}>
+                  <span className="goal-card-icon">↔️</span>
+                  <span className="goal-card-title">Rows & Cols</span>
+                  <span className="goal-card-value">{progress.rowsDone} / {boardSize}</span>
+                  <span className="goal-card-desc">1 cat per line</span>
+                </div>
+                <div className={`goal-hud-card ${progress.regionsDone === boardSize ? 'done' : ''}`}>
+                  <span className="goal-card-icon">🎨</span>
+                  <span className="goal-card-title">Colors</span>
+                  <span className="goal-card-value">{progress.regionsDone} / {boardSize}</span>
+                  <span className="goal-card-desc">1 per territory</span>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Grid Board */}
           <div className="board-container">

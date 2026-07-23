@@ -96,7 +96,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  gap: 6px;
 }
 
 .header-btn {
@@ -582,6 +583,7 @@ body {
   font-size: 14px;
   line-height: 1.4;
   box-shadow: 0 4px 0 var(--border-color);
+  white-space: pre-line;
 }
 
 .tutorial-step-dots {
@@ -647,4 +649,75 @@ body {
     transform: translateY(100vh) rotate(360deg);
     opacity: 0;
   }
+}
+
+/* Horizontal Goal Bar (Matches Game Play Width) */
+.goals-hud-bar {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.goal-hud-card {
+  background: var(--panel-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 3px 0 var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.goal-hud-card.done {
+  background: #e8f5e9;
+  border-color: #81c784;
+  box-shadow: 0 3px 0 #81c784;
+}
+
+.goal-card-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.goal-card-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.goal-hud-card.done .goal-card-title {
+  color: #2e7d32;
+}
+
+.goal-card-value {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 1px;
+}
+
+.goal-hud-card.done .goal-card-value {
+  color: #2e7d32;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.goal-card-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.goal-hud-card.done .goal-card-desc {
+  color: #388e3c;
+  opacity: 0.8;
 }
