@@ -1,13 +1,13 @@
-import { Decorations } from './components/Decorations';
-import { EditProfileModal } from './components/EditProfileModal';
-import { GameBoard } from './components/GameBoard';
-import { GameHeader } from './components/GameHeader';
-import { GoalsHUD } from './components/GoalsHUD';
-import { GameOverModal, PauseModal, VictoryModal } from './components/Modals';
-import { DifficultySelectScreen, HomeScreen, StatisticsScreen } from './components/Screens';
-import { Tutorial } from './components/Tutorial';
+import React from 'react';
 import { useGamePlay } from './hooks/useGamePlay';
 import { useUserProfile } from './hooks/useUserProfile';
+import { MainDashboard } from './components/Dashboard';
+import { GameHeader } from './components/GameHeader';
+import { GoalsHUD } from './components/GoalsHUD';
+import { GameBoard } from './components/GameBoard';
+import { EditProfileModal } from './components/EditProfileModal';
+import { PauseModal, VictoryModal, GameOverModal } from './components/Modals';
+import { Decorations } from './components/Decorations';
 import { audio } from './utils/AudioEngine';
 
 export default function App() {
@@ -60,30 +60,29 @@ export default function App() {
       {/* Decorative sakura petals */}
       <Decorations />
 
-      {/* 1. HOME SCREEN */}
+      {/* 1. HOME / DASHBOARD SCREEN */}
       {screen === 'home' && (
-        <HomeScreen
+        <MainDashboard 
           username={username}
           avatar={avatar}
           gamesWon={stats.gamesWon}
           isMuted={isMuted}
-          onPlayClick={() => { audio.playClick(); setScreen('difficulty'); }}
-          onTutorialClick={() => { audio.playClick(); setScreen('tutorial'); }}
-          onStatsClick={() => { audio.playClick(); setScreen('stats'); }}
+          onPlayDifficulty={startNewGame}
           onMuteToggle={toggleMute}
           onOpenProfile={handleOpenEditProfile}
+          stats={stats}
+          onResetStats={() => {
+            saveStats({
+              gamesPlayed: 0,
+              gamesWon: 0,
+              bestTimes: { easy: null, medium: null, hard: null, expert: null, master: null }
+            });
+          }}
+          formatTime={formatTime}
         />
       )}
 
-      {/* 2. DIFFICULTY SELECT SCREEN */}
-      {screen === 'difficulty' && (
-        <DifficultySelectScreen
-          onMenuClick={() => { audio.playClick(); setScreen('home'); }}
-          onSelectDifficulty={startNewGame}
-        />
-      )}
-
-      {/* 3. GAME SCREEN */}
+      {/* 2. GAME PLAY SCREEN */}
       {screen === 'game' && puzzle && (
         <div className="screen">
           <GameHeader
@@ -160,27 +159,6 @@ export default function App() {
             onMenu={() => setScreen('home')}
           />
         </div>
-      )}
-
-      {/* 4. STATISTICS SCREEN */}
-      {screen === 'stats' && (
-        <StatisticsScreen
-          stats={stats}
-          onMenuClick={() => { audio.playClick(); setScreen('home'); }}
-          onResetStats={() => {
-            saveStats({
-              gamesPlayed: 0,
-              gamesWon: 0,
-              bestTimes: { easy: null, medium: null, hard: null, expert: null, master: null }
-            });
-          }}
-          formatTime={formatTime}
-        />
-      )}
-
-      {/* 5. INTERACTIVE TUTORIAL SCREEN */}
-      {screen === 'tutorial' && (
-        <Tutorial onClose={() => setScreen('home')} />
       )}
 
       {/* Edit Profile Modal */}

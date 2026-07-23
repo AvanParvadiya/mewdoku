@@ -44,13 +44,19 @@
   user-select: none;
 }
 
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--bg-color);
+}
+
 body {
   font-family: var(--font-body);
-  background-color: var(--bg-color);
   color: var(--text-main);
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
-  overflow-x: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -59,13 +65,13 @@ body {
 #root {
   width: 100%;
   max-width: 500px;
-  height: 100vh;
-  height: -webkit-fill-available;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-color);
   position: relative;
   box-shadow: 0 10px 30px rgba(78, 54, 41, 0.08);
+  overflow: hidden;
 }
 
 /* App Container */
@@ -73,8 +79,8 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   padding: calc(16px + var(--safe-top)) 16px calc(16px + var(--safe-bottom)) 16px;
-  justify-content: space-between;
   overflow: hidden;
   position: relative;
 }
@@ -859,4 +865,59 @@ body {
   background: #fff176 !important;
   border-color: var(--primary) !important;
   box-shadow: 0 0 0 2px var(--primary);
+}
+
+/* Bottom Navigation Dashboard Styles */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.dashboard-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+}
+
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  background: var(--panel-bg);
+  border-top: 3px solid var(--border-color);
+  padding: 10px 0;
+  z-index: 100;
+  box-shadow: 0 -4px 10px rgba(121, 85, 72, 0.05);
+  flex-shrink: 0;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.bottom-nav-item.active {
+  color: var(--primary);
+  background: rgba(121, 85, 72, 0.08);
+}
+
+.bottom-nav-icon {
+  font-size: 20px;
+  line-height: 1;
 }
