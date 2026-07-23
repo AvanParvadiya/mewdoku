@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { generatePuzzle, solvePuzzle, Position, Puzzle } from './utils/gameLogic';
 import { audio } from './utils/AudioEngine';
 import { Tutorial } from './components/Tutorial';
-import { Board3D } from './components/Board3D';
 
 // Capacitor orientation locking
 import { ScreenOrientation } from '@capacitor/screen-orientation';
@@ -533,15 +532,34 @@ export default function App() {
             </div>
           </div>
 
-          {/* Grid Board (3D WebGL rendered via PlayCanvas) */}
+          {/* Grid Board */}
           <div className="board-container">
-            <Board3D
-              size={boardSize}
-              regions={puzzle.regions}
-              grid={grid}
-              onCellClick={handleCellClick}
-              errorCell={errorCell}
-            />
+            <div 
+              className="board" 
+              style={{ 
+                gridTemplateColumns: `repeat(${boardSize}, 1fr)`,
+                gridTemplateRows: `repeat(${boardSize}, 1fr)`
+              }}
+            >
+              {puzzle.regions.map((rowArr, r) =>
+                rowArr.map((regionId, c) => {
+                  const borderClass = getCellBorders(r, c);
+                  const isError = errorCell?.row === r && errorCell?.col === c;
+                  const value = grid[r][c];
+
+                  return (
+                    <div
+                      key={`${r}-${c}`}
+                      className={`cell cell-region-${regionId} ${borderClass} ${isError ? 'cell-error' : ''}`}
+                      onClick={() => handleCellClick(r, c)}
+                    >
+                      {value === 'CAT' && <span className="cell-content cell-cat">🐱</span>}
+                      {value === 'X' && <span className="cell-content cell-x">❌</span>}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
 
           {/* Footer UI: Mode Switch & Undo/Hint Buttons */}
