@@ -32,7 +32,6 @@ export default function App() {
   const [mistakes, setMistakes] = useState(0);
   const [timer, setTimer] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(false);
-  const [inputMode, setInputMode] = useState<'CAT' | 'X'>('CAT');
   const [history, setHistory] = useState<CellValue[][][]>([]);
   
   // Modals
@@ -55,6 +54,8 @@ export default function App() {
   });
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastClickRef = useRef<{ row: number; col: number; timestamp: number } | null>(null);
 
   // Load stats on mount
   useEffect(() => {
@@ -84,6 +85,10 @@ export default function App() {
       }
     };
     lockOrientation();
+
+    return () => {
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+    };
   }, []);
 
   // Timer effect
@@ -137,7 +142,6 @@ export default function App() {
     setIsVictory(false);
     setIsGameOver(false);
     setIsTimerActive(true);
-    setInputMode('CAT');
     
     // Play meow when starting a game
     audio.playMeow();
@@ -151,110 +155,117 @@ export default function App() {
     saveStats(updatedStats);
   };
 
-  // Click handler for grid cells
+  // Click handler for grid cells: Decides between single click (X) and double click (CAT)
   const handleCellClick = (r: number, c: number) => {
     if (isVictory || isGameOver || isPaused || !puzzle) return;
-    
-    // Audio feedback
-    audio.playClick();
 
+    const now = Date.now();
+    const lastClick = lastClickRef.current;
+
+    // Detect double click (within 260ms on the same cell)
+    if (lastClick && lastClick.row === r && lastClick.col === c && (now - lastClick.timestamp) < 260) {
+      // Clear active single click timer
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+      }
+      lastClickRef.current = null;
+      handleCellDoubleClick(r, c);
+    } else {
+      // Record this click and schedule single click check
+      lastClickRef.current = { row: r, col: c, timestamp: now };
+      
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+
+      clickTimeoutRef.current = setTimeout(() => {
+        handleCellSingleClick(r, c);
+        lastClickRef.current = null;
+        clickTimeoutRef.current = null;
+      }, 260);
+    }
+  };
+
+  // Single Click: Place/Toggle "X"
+  const handleCellSingleClick = (r: number, c: number) => {
+    if (isVictory || isGameOver || isPaused || !puzzle) return;
+    
+    audio.playClick();
     const currentValue = grid[r][c];
 
-    // Push current to history for undo
+    // Push current grid to history for undo
     const gridCopy = grid.map(row => [...row]);
     setHistory(prev => [...prev, gridCopy]);
 
-    // Perform action based on mode
-    if (inputMode === 'CAT') {
-      if (currentValue === 'CAT') {
-        // Clear cat
-        const newGrid = grid.map((rowArr, ri) => 
-          rowArr.map((cellVal, ci) => (ri === r && ci === c ? null : cellVal))
-        );
-        setGrid(newGrid);
-      } else {
-        // User is placing a cat. Verify against unique solution.
-        const isSolutionCat = puzzle.solution.some(pos => pos.row === r && pos.col === c);
-        
-        if (isSolutionCat) {
-          // CORRECT Placement
-          const newGrid = grid.map((rowArr, ri) => 
-            rowArr.map((cellVal, ci) => (ri === r && ci === c ? 'CAT' : cellVal))
-          );
-          
-          // Auto-fill X in the same row, col, and surrounding cells
-          // since a cat blocks row, column, and adjacent cells!
-          // This is a premium UX helper.
-          const autoFilledGrid = newGrid.map((rowArr, ri) => 
-            rowArr.map((cellVal, ci) => {
-              if (ri === r && ci === c) return 'CAT';
-              
-              // If cell already has something, keep it
-              if (cellVal !== null) return cellVal;
-
-              // Row or Col matches
-              const inRowCol = (ri === r || ci === c);
-              // Surrounding 8 cells touch
-              const touches = (Math.abs(ri - r) <= 1 && Math.abs(ci - c) <= 1);
-              
-              if (inRowCol || touches) {
-                return 'X';
-              }
-              return cellVal;
-            })
-          );
-
-          setGrid(autoFilledGrid);
-          audio.playCorrect();
-          
-          // Check win condition
-          checkWinCondition(autoFilledGrid);
-        } else {
-          // INCORRECT Placement (Mistake)
-          setErrorCell({ row: r, col: c });
-          audio.playError();
-          
-          // Shake animation active for 350ms, then deduct heart and place X
-          setTimeout(() => {
-            setErrorCell(null);
-            setMistakes(prev => {
-              const nextMistakes = prev + 1;
-              if (nextMistakes >= 3) {
-                setIsGameOver(true);
-                setIsTimerActive(false);
-              }
-              return nextMistakes;
-            });
-            
-            // Mark cell with X since there cannot be a cat there
-            setGrid(prevGrid => 
-              prevGrid.map((rowArr, ri) => 
-                rowArr.map((cellVal, ci) => (ri === r && ci === c ? 'X' : cellVal))
-              )
-            );
-          }, 350);
-        }
-      }
+    let newGrid;
+    if (currentValue === 'X' || currentValue === 'CAT') {
+      // Clear cell if already marked
+      newGrid = grid.map((rowArr, ri) => 
+        rowArr.map((cellVal, ci) => (ri === r && ci === c ? null : cellVal))
+      );
     } else {
-      // X-MARK MODE
-      if (currentValue === 'CAT') {
-        // Cannot overwrite correct cats directly unless intentional, but let's clear it
+      // Mark as X
+      newGrid = grid.map((rowArr, ri) => 
+        rowArr.map((cellVal, ci) => (ri === r && ci === c ? 'X' : cellVal))
+      );
+    }
+    setGrid(newGrid);
+  };
+
+  // Double Click: Place/Toggle "CAT" (validates against the unique solution)
+  const handleCellDoubleClick = (r: number, c: number) => {
+    if (isVictory || isGameOver || isPaused || !puzzle) return;
+
+    audio.playClick();
+    const currentValue = grid[r][c];
+
+    // Push current grid to history for undo
+    const gridCopy = grid.map(row => [...row]);
+    setHistory(prev => [...prev, gridCopy]);
+
+    if (currentValue === 'CAT') {
+      // Clear cat
+      const newGrid = grid.map((rowArr, ri) => 
+        rowArr.map((cellVal, ci) => (ri === r && ci === c ? null : cellVal))
+      );
+      setGrid(newGrid);
+    } else {
+      // Verify placement against the solution
+      const isSolutionCat = puzzle.solution.some(pos => pos.row === r && pos.col === c);
+      
+      if (isSolutionCat) {
+        // Correct placement
         const newGrid = grid.map((rowArr, ri) => 
-          rowArr.map((cellVal, ci) => (ri === r && ci === c ? null : cellVal))
+          rowArr.map((cellVal, ci) => (ri === r && ci === c ? 'CAT' : cellVal))
         );
+
         setGrid(newGrid);
-      } else if (currentValue === 'X') {
-        // Clear X
-        const newGrid = grid.map((rowArr, ri) => 
-          rowArr.map((cellVal, ci) => (ri === r && ci === c ? null : cellVal))
-        );
-        setGrid(newGrid);
+        audio.playCorrect();
+        checkWinCondition(newGrid);
       } else {
-        // Place X
-        const newGrid = grid.map((rowArr, ri) => 
-          rowArr.map((cellVal, ci) => (ri === r && ci === c ? 'X' : cellVal))
-        );
-        setGrid(newGrid);
+        // Incorrect placement (Mistake)
+        setErrorCell({ row: r, col: c });
+        audio.playError();
+        
+        setTimeout(() => {
+          setErrorCell(null);
+          setMistakes(prev => {
+            const nextMistakes = prev + 1;
+            if (nextMistakes >= 3) {
+              setIsGameOver(true);
+              setIsTimerActive(false);
+            }
+            return nextMistakes;
+          });
+          
+          // Mark with X since a cat is impossible here
+          setGrid(prevGrid => 
+            prevGrid.map((rowArr, ri) => 
+              rowArr.map((cellVal, ci) => (ri === r && ci === c ? 'X' : cellVal))
+            )
+          );
+        }, 350);
       }
     }
   };
@@ -290,22 +301,10 @@ export default function App() {
         rowArr.map((cellVal, ci) => (ri === r && ci === c ? 'CAT' : cellVal))
       );
 
-      // Auto-fill X around this cat as well
-      const autoFilledGrid = newGrid.map((rowArr, ri) => 
-        rowArr.map((cellVal, ci) => {
-          if (ri === r && ci === c) return 'CAT';
-          if (cellVal !== null) return cellVal;
-          const inRowCol = (ri === r || ci === c);
-          const touches = (Math.abs(ri - r) <= 1 && Math.abs(ci - c) <= 1);
-          if (inRowCol || touches) return 'X';
-          return cellVal;
-        })
-      );
-
-      setGrid(autoFilledGrid);
+      setGrid(newGrid);
       setHintUsedCount(prev => prev + 1);
       audio.playCorrect();
-      checkWinCondition(autoFilledGrid);
+      checkWinCondition(newGrid);
     }
   };
 
@@ -562,22 +561,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Footer UI: Mode Switch & Undo/Hint Buttons */}
           <div className="game-footer">
-            <div className="input-modes">
-              <button 
-                className={`mode-btn ${inputMode === 'CAT' ? 'active' : ''}`}
-                onClick={() => { audio.playClick(); setInputMode('CAT'); }}
-              >
-                🐱 Place Cat
-              </button>
-              <button 
-                className={`mode-btn ${inputMode === 'X' ? 'active' : ''}`}
-                onClick={() => { audio.playClick(); setInputMode('X'); }}
-              >
-                ❌ Mark 'X'
-              </button>
-            </div>
 
             <div className="action-buttons">
               <button className="btn-action" onClick={handleUndo} disabled={history.length === 0}>
